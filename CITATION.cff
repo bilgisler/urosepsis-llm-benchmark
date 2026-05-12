@@ -26,7 +26,7 @@ identifiers:
   - type: doi
     value: "10.5281/zenodo.20133738"
     description: "DOI for version v0.1.1 (initial pre-registration freeze)"
-version: "0.1.2"
+version: "0.1.3"
 date-released: 2026-05-12
 keywords:
   - urosepsis
