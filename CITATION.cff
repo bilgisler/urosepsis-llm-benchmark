@@ -1,14 +1,33 @@
 cff-version: 1.2.0
 title: "Urosepsis LLM Benchmark — Multidisciplinary Clinical Decision Support Performance of Frontier Large Language Models"
 message: "If you use this work, please cite as below."
-type: dataset
+type: software
 authors:
+  - given-names: "Yeşim"
+    family-names: "Bayraktar"
+    affiliation: "Selçuk University Faculty of Medicine, Department of Intensive Care, Konya, Türkiye"
+    orcid: "https://orcid.org/0000-0001-5156-7064"
+    email: "bayraktaryesim83@gmail.com"
   - given-names: "Bilgi"
     family-names: "İşler"
     affiliation: "Konya City Hospital, University of Health Sciences, Konya, Türkiye"
     orcid: "https://orcid.org/0000-0003-1243-9072"
     email: "bilgi.isler249@gmail.com"
+  - given-names: "Ahmet Murat"
+    family-names: "Bayraktar"
+    affiliation: "Konya City Hospital, University of Health Sciences, Konya, Türkiye"
+    orcid: "https://orcid.org/0000-0002-4913-8698"
+    email: "drahmetbayraktar@gmail.com"
 repository-code: "https://github.com/bilgisler/urosepsis-llm-benchmark"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20133737"
+    description: "Concept DOI — always points to the latest version"
+  - type: doi
+    value: "10.5281/zenodo.20133738"
+    description: "DOI for version v0.1.1 (initial pre-registration freeze)"
+version: "0.1.2"
+date-released: 2026-05-12
 keywords:
   - urosepsis
   - large language model
