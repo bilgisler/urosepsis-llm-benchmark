@@ -104,7 +104,7 @@ urosepsis-llm-benchmark/
 
 ### 1. Ortam kurulumu
 ```bash
-git clone https://github.com/[USER]/urosepsis-llm-benchmark.git
+git clone https://github.com/bilgisler/urosepsis-llm-benchmark.git
 cd urosepsis-llm-benchmark
 ```
 
