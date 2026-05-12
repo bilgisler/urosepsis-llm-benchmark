@@ -3,12 +3,12 @@ title: "Urosepsis LLM Benchmark — Multidisciplinary Clinical Decision Support 
 message: "If you use this work, please cite as below."
 type: dataset
 authors:
-  - given-names: "[Ad]"
-    family-names: "[Soyad]"
-    affiliation: "[Kurum]"
-    orcid: "https://orcid.org/[ORCID]"
+  - given-names: "Bilgi"
+    family-names: "İşler"
+    affiliation: "Konya City Hospital, University of Health Sciences, Konya, Türkiye"
+    orcid: "https://orcid.org/0000-0003-1243-9072"
+    email: "bilgi.isler249@gmail.com"
 repository-code: "https://github.com/bilgisler/urosepsis-llm-benchmark"
-url: "https://osf.io/[OSF-ID]"
 keywords:
   - urosepsis
   - large language model
@@ -17,13 +17,5 @@ keywords:
   - SSC 2026
   - EAU 2026
   - TRIPOD-LLM
+  - CHART
 license: MIT
-preferred-citation:
-  type: article
-  title: "Multidisciplinary Clinical Decision Support Performance of Frontier Large Language Models in Urosepsis Management"
-  authors:
-    - given-names: "[Ad]"
-      family-names: "[Soyad]"
-  year: 2026
-  journal: "[Dergi]"
-  doi: "[DOI]"
