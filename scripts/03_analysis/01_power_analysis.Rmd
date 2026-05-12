@@ -1,0 +1,291 @@
+---
+title: "Power Analysis — Ürosepsis LLM Benchmark"
+subtitle: "Simulation-based power for CLMM and GLMM-binomial"
+author: "[PI ve biostatistician]"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    code_folding: show
+  pdf_document:
+    toc: true
+---
+
+> Bu doküman, çalışmanın **pre-registration**'ında belirtilen simulation-based power analizinin
+> hem teorik temelini hem de çalıştırılabilir R kodunu içerir. OSF protokolünde Section 4.4
+> ile, istatistik planında §3 ile uyumludur.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 5
+)
+set.seed(2026)
+```
+
+# 1. Amaç
+
+Çalışmanın birincil analizi (CLMM) ve ikincil Boolean analizi (GLMM-binomial) için
+**simulation-based güç hesaplaması** yapmak. Klasik formül-bazlı güç hesabı
+karışık modeller için yetersizdir (Green & MacLeod 2016).
+
+## Tasarım Parametreleri (kilitli)
+
+| Parametre | Değer | Gerekçe |
+|---|---|---|
+| Vinyet sayısı (N) | 32 | Lojistik sınır; her 16 konu × 2 |
+| LLM sayısı | 3 | Frontier triad |
+| Rater sayısı | 2 (+ adjudikatör) | Disiplin başına 1 prof |
+| Toplam birincil yanıt | 96 | 3 × 32 |
+| Likert observation | 768 | 96 × 4 dimension × 2 rater |
+| α (iki yönlü) | 0.05 | Standart |
+| Hedef power | ≥ 0.80 | Cohen sözleşmesi |
+| Beklenen etki büyüklüğü | OR = 2.0 (log-odds ≈ 0.69) | Orta etki, klinik anlamlı |
+
+# 2. Paketler
+
+```{r packages}
+required_pkgs <- c("ordinal", "lme4", "simr", "emmeans",
+                   "dplyr", "tidyr", "ggplot2", "purrr")
+
+# Kurulum (gerekirse)
+to_install <- setdiff(required_pkgs, rownames(installed.packages()))
+if (length(to_install) > 0) install.packages(to_install)
+
+invisible(lapply(required_pkgs, library, character.only = TRUE))
+```
+
+# 3. Veri Yapısı Simülasyonu
+
+```{r sim-data}
+make_sim_data <- function(n_vignettes = 32,
+                          n_llm = 3,
+                          n_raters = 2,
+                          n_dimensions = 4) {
+  expand.grid(
+    vignette_id = factor(seq_len(n_vignettes)),
+    llm = factor(c("GPT-5.5", "Opus-4.7", "Gemini-3.1")),
+    rater_id = factor(c("Uro", "ICU")),
+    dimension = factor(c("Accuracy", "Guideline", "Safety", "Multidisc"))
+  ) |>
+    as_tibble()
+}
+
+sim_grid <- make_sim_data()
+glimpse(sim_grid)
+nrow(sim_grid)  # 32 * 3 * 2 * 4 = 768
+```
+
+# 4. CLMM — Birincil Likert Analizi Güç
+
+## 4.1 Generative model
+
+Ordinal Likert (5 düzey) için kümülatif logit model:
+
+\[
+\text{logit}\,P(Y \le k \mid \text{LLM, dim, vinyet, rater})
+= \alpha_k - (\beta_{\text{LLM}} + \beta_{\text{dim}} + \beta_{\text{LLM×dim}})
+- u_{\text{vinyet}} - u_{\text{rater}}
+\]
+
+Random effects: \(u_{\text{vinyet}} \sim N(0, \sigma_v^2)\),
+\(u_{\text{rater}} \sim N(0, \sigma_r^2)\).
+
+```{r clmm-sim-fn}
+simulate_likert <- function(grid,
+                            llm_effect = log(2.0),  # OR=2.0
+                            sigma_v = 0.7,
+                            sigma_r = 0.3) {
+
+  vignette_re <- rnorm(nlevels(grid$vignette_id), 0, sigma_v)
+  rater_re    <- rnorm(nlevels(grid$rater_id),    0, sigma_r)
+
+  # LLM kontrastı: GPT ref=0, Opus=+effect/2, Gemini=-effect/2 (varsayım)
+  llm_lp <- c("GPT-5.5" = 0, "Opus-4.7" = llm_effect, "Gemini-3.1" = -llm_effect/2)
+  dim_lp <- c("Accuracy" = 0, "Guideline" = -0.2, "Safety" = 0.3, "Multidisc" = -0.4)
+
+  lp <- llm_lp[as.character(grid$llm)] +
+        dim_lp[as.character(grid$dimension)] +
+        vignette_re[as.integer(grid$vignette_id)] +
+        rater_re[as.integer(grid$rater_id)]
+
+  # Cumulative thresholds (5-point Likert)
+  thr <- c(-3, -1, 0.5, 2)
+
+  # Sample ordinal outcome
+  probs <- sapply(seq_along(thr), function(i) {
+    plogis(thr[i] - lp)
+  })
+  probs <- cbind(probs, 1)
+  cumP <- probs
+  catP <- cbind(cumP[, 1], t(apply(cumP, 1, diff)))
+  catP <- pmax(catP, 0); catP <- catP / rowSums(catP)
+
+  y <- apply(catP, 1, function(p) sample(1:5, 1, prob = p))
+  factor(y, levels = 1:5, ordered = TRUE)
+}
+```
+
+## 4.2 Tek koşumda güç tahmini
+
+```{r clmm-power-one}
+run_clmm_power <- function(n_sim = 200, alpha = 0.05) {
+  pvals <- numeric(n_sim)
+  for (i in seq_len(n_sim)) {
+    d <- sim_grid
+    d$likert <- simulate_likert(d)
+    fit <- try(
+      clmm(likert ~ llm * dimension +
+             (1 | vignette_id) + (1 | rater_id),
+           data = d, link = "logit"),
+      silent = TRUE
+    )
+    if (inherits(fit, "try-error")) { pvals[i] <- NA; next }
+    # LLM ana etkisi LRT
+    fit0 <- try(
+      clmm(likert ~ dimension + (1 | vignette_id) + (1 | rater_id),
+           data = d, link = "logit"),
+      silent = TRUE
+    )
+    if (inherits(fit0, "try-error")) { pvals[i] <- NA; next }
+    pvals[i] <- anova(fit0, fit)[2, "Pr(>Chisq)"]
+  }
+  mean(pvals < alpha, na.rm = TRUE)
+}
+
+# NOT: Bu blok 200 simülasyonla ~5-15 dk sürer.
+# Pre-registration için 1000 simülasyon hedeflenmiştir.
+# powr_likert <- run_clmm_power(n_sim = 1000)
+# powr_likert
+```
+
+# 5. GLMM-Binomial — Boolean Çekirdek Madde Güç
+
+## 5.1 Generative model
+
+```{r glmm-sim-fn}
+sim_boolean_grid <- function(n_vignettes = 32,
+                             n_llm = 3,
+                             n_raters = 2,
+                             n_items = 28) {
+  expand.grid(
+    vignette_id = factor(seq_len(n_vignettes)),
+    llm = factor(c("GPT-5.5", "Opus-4.7", "Gemini-3.1")),
+    rater_id = factor(c("Uro", "ICU")),
+    item_id = factor(seq_len(n_items))
+  )
+}
+
+simulate_boolean <- function(grid,
+                             llm_effect = log(2.0),
+                             p_base = 0.65,
+                             sigma_v = 0.8,
+                             sigma_r = 0.2,
+                             sigma_item = 0.5) {
+  vre <- rnorm(nlevels(grid$vignette_id), 0, sigma_v)
+  rre <- rnorm(nlevels(grid$rater_id),    0, sigma_r)
+  ire <- rnorm(nlevels(grid$item_id),     0, sigma_item)
+
+  llm_lp <- c("GPT-5.5" = 0, "Opus-4.7" = llm_effect, "Gemini-3.1" = -llm_effect/2)
+
+  lp <- qlogis(p_base) + llm_lp[as.character(grid$llm)] +
+        vre[as.integer(grid$vignette_id)] +
+        rre[as.integer(grid$rater_id)] +
+        ire[as.integer(grid$item_id)]
+  p <- plogis(lp)
+  rbinom(length(p), 1, p)
+}
+
+# Örnek tek koşum
+boo_grid <- sim_boolean_grid()
+boo_grid$correct <- simulate_boolean(boo_grid)
+table(boo_grid$llm, boo_grid$correct)
+```
+
+## 5.2 GLMM güç tahmini
+
+```{r glmm-power}
+run_glmm_power <- function(n_sim = 200, alpha = 0.05) {
+  pvals <- numeric(n_sim)
+  for (i in seq_len(n_sim)) {
+    d <- sim_boolean_grid()
+    d$correct <- simulate_boolean(d)
+    fit <- try(
+      glmer(correct ~ llm + (1 | vignette_id) + (1 | rater_id) + (1 | item_id),
+            data = d, family = binomial,
+            control = glmerControl(optimizer = "bobyqa")),
+      silent = TRUE
+    )
+    if (inherits(fit, "try-error")) { pvals[i] <- NA; next }
+    fit0 <- try(
+      glmer(correct ~ 1 + (1 | vignette_id) + (1 | rater_id) + (1 | item_id),
+            data = d, family = binomial,
+            control = glmerControl(optimizer = "bobyqa")),
+      silent = TRUE
+    )
+    if (inherits(fit0, "try-error")) { pvals[i] <- NA; next }
+    pvals[i] <- anova(fit0, fit)[2, "Pr(>Chisq)"]
+  }
+  mean(pvals < alpha, na.rm = TRUE)
+}
+
+# powr_boolean <- run_glmm_power(n_sim = 1000)
+# powr_boolean
+```
+
+# 6. Pre-Registration İçin Hedef Çıktılar
+
+```{r expected-output, eval = FALSE}
+# Pre-registration anında 1000-simülasyon ile çalıştırılır:
+results_table <- tibble::tribble(
+  ~Analysis,             ~Effect,    ~N_sim, ~Power,
+  "CLMM (Likert birincil)",   "OR=2.0",  1000,  NA,  # ~0.85 beklenir
+  "GLMM (Boolean çekirdek)",  "OR=2.0",  1000,  NA,  # ~0.90 beklenir
+  "GLMM (Safety)",            "OR=2.5",  1000,  NA,  # ~0.75
+  "GLMM (Hallucination)",     "OR=2.5",  1000,  NA   # ~0.70
+)
+results_table
+```
+
+# 7. Sensitivity Analizleri
+
+```{r sensitivity, eval = FALSE}
+effect_grid <- c(log(1.5), log(2.0), log(2.5), log(3.0))
+power_curve <- purrr::map_dfr(effect_grid, function(eff) {
+  # simulate_likert için llm_effect = eff
+  tibble(or = exp(eff),
+         power = run_clmm_power_with_effect(eff, n_sim = 500))
+})
+
+ggplot(power_curve, aes(or, power)) +
+  geom_line() + geom_point() +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  labs(x = "Odds Ratio (LLM effect)",
+       y = "Statistical Power",
+       title = "CLMM Power Curve — Ürosepsis LLM Benchmark") +
+  theme_minimal()
+```
+
+# 8. Karar Kuralı
+
+- Eğer **CLMM güç < 0.80** beklenen OR=2.0'da → çalışma protokol gözden geçirilir:
+  - Olasılıklar: (a) ek vinyet (32 → 48, OSF sapma olarak raporlanır), (b) etki büyüklüğü kabulü düşürülür ve "exploratory" damgası eklenir.
+- Eğer **güç ≥ 0.80** → mevcut tasarımla devam.
+
+# 9. Reporting
+
+Bu analizin nihai çıktısı:
+- `power_simulation_results.csv` (1000 simülasyon × her analiz × p-değer)
+- `power_curve.png`
+- Bu Rmd'nin knit edilmiş HTML/PDF'i
+
+Hepsi OSF supplement ve GitHub repo'da saklanır.
+
+# 10. References
+
+- Green P, MacLeod CJ. SIMR: an R package for power analysis of generalized linear mixed models by simulation. *Methods Ecol Evol.* 2016;7(4):493-498.
+- Christensen RHB. ordinal—Regression Models for Ordinal Data. R package version 2023.12-4.1.
+- Gallifant J et al. The TRIPOD-LLM reporting guideline. *Nat Med.* 2025;31(1):60-69.

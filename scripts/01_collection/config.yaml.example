@@ -1,0 +1,50 @@
+# OpenRouter API config — KOPYALA, "config.yaml" olarak kaydet, API anahtarını doldur
+# config.yaml .gitignore'da; asla commit etme.
+
+api:
+  base_url: "https://openrouter.ai/api/v1/chat/completions"
+  key: "OPENROUTER_API_KEY_BURAYA"
+  timeout_seconds: 120
+  rate_limit_retry_seconds: 60
+  max_retries: 3
+
+models:
+  - name: "GPT-5.5"
+    id: "openai/gpt-5.5"            # NOT: gerçek ID veri toplama anında doğrulanır
+    provider: "OpenAI"
+  - name: "Claude Opus 4.7"
+    id: "anthropic/claude-opus-4-7"
+    provider: "Anthropic"
+  - name: "Gemini Pro 3.1"
+    id: "google/gemini-pro-3.1"
+    provider: "Google"
+
+parameters:
+  temperature: 0.0
+  top_p: 1.0
+  max_tokens: 4096
+  presence_penalty: 0.0
+  frequency_penalty: 0.0
+  stream: false
+  seed: 2026
+
+prompts:
+  system: ""    # boş — kontrolü maksimize etmek için
+  user_template: |
+    Sen deneyimli bir yoğun bakım uzmanı ve üroloji uzmanısın. Aşağıdaki klinik senaryoyu oku.
+
+    Bu hastanın yoğun bakım kabul anından itibaren ilk 6 saatlik yönetim planını detaylı olarak açıkla. Her önerini gerekçelendir ve dayandığın güncel kanıta dayalı kılavuz önerilerini açıkça belirt.
+
+    {VIGNETTE}
+
+reproducibility:
+  enabled: true
+  seed: 2026
+  n_vignettes_sampled: 10
+  runs_per_vignette: 3
+  min_gap_seconds: 3600    # ≥1 saat arayla
+
+logging:
+  output_dir: "data/raw_responses/primary_run"
+  reproducibility_dir: "data/raw_responses/reproducibility_run"
+  log_jsonl: true
