@@ -7,7 +7,7 @@ authors:
     family-names: "[Soyad]"
     affiliation: "[Kurum]"
     orcid: "https://orcid.org/[ORCID]"
-repository-code: "https://github.com/[USER]/urosepsis-llm-benchmark"
+repository-code: "https://github.com/bilgisler/urosepsis-llm-benchmark"
 url: "https://osf.io/[OSF-ID]"
 keywords:
   - urosepsis
