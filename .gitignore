@@ -1,0 +1,41 @@
+# API anahtarları ve credentials
+scripts/01_collection/config.yaml
+*.env
+.env*
+secrets/
+**/api_key*
+**/credentials*
+
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# renv (lock dosyası KOMMIT EDİLİR, ama kütüphaneler değil)
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Knitr/Rmd cache
+*_cache/
+*_files/
+*.html
+*.pdf
+!supplement/*.pdf
+!docs/*.pdf
+
+# Geçici
+*.log
+*.tmp
+*~
+
+# Büyük raw veri (Zenodo'ya gider, repo'ya değil)
+data/raw_responses/**/raw_dump_*.json
