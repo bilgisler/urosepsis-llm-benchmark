@@ -1,7 +1,12 @@
 # Urosepsis LLM Benchmark
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20133737.svg)](https://doi.org/10.5281/zenodo.20133737)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
 Frontier Büyük Dil Modellerinin Ürosepsis Yönetiminde Multidisipliner Klinik Karar Destek Performansı — SSC 2026 ve EAU 2026 Kılavuz Bazlı Kör Benchmark Çalışması
 
+> **Archived on Zenodo:** [10.5281/zenodo.20133737](https://doi.org/10.5281/zenodo.20133737) (concept DOI, points to latest version)
 > **Pre-registered on OSF:** *[DOI eklenecek]*
 > **Reporting:** TRIPOD-LLM (Nat Med 2025, PMID 39779929) + CHART (BMJ Open 2024, PMID 38772889)
 > **License:** Code MIT, Data + Vignettes CC-BY 4.0
@@ -163,19 +168,43 @@ Hiçbir LLM provider çalışmanın tasarımına, veri toplama veya analizine ka
 
 Çalışmayı kullanırsanız lütfen şu şekilde atıf yapın:
 
+**Repo / dataset citation (Zenodo):**
+
 ```bibtex
-@article{urosepsis_llm_benchmark_2026,
-  title   = {Multidisciplinary Clinical Decision Support Performance of Frontier
-             Large Language Models in Urosepsis Management},
-  author  = {[Yazarlar]},
-  journal = {[Dergi]},
-  year    = {2026},
-  doi     = {[DOI]},
-  note    = {OSF pre-registration: [OSF DOI]}
+@software{bayraktar_urosepsis_llm_benchmark_2026,
+  author    = {Bayraktar, Yeşim and İşler, Bilgi and Bayraktar, Ahmet Murat},
+  title     = {Urosepsis LLM Benchmark — Multidisciplinary Clinical Decision
+               Support Performance of Frontier Large Language Models},
+  year      = {2026},
+  publisher = {Zenodo},
+  version   = {v0.1.2},
+  doi       = {10.5281/zenodo.20133737},
+  url       = {https://doi.org/10.5281/zenodo.20133737},
+  note      = {OSF pre-registration: [DOI eklenecek]}
 }
 ```
 
-## Kontakt
+**Manuscript citation (yayınlandıktan sonra eklenecek):**
 
-- **PI:** [Ad Soyad], [Kurum], [email]
+```bibtex
+@article{bayraktar_urosepsis_llm_benchmark_manuscript,
+  author  = {Bayraktar, Yeşim and İşler, Bilgi and Bayraktar, Ahmet Murat},
+  title   = {Multidisciplinary Clinical Decision Support Performance of Frontier
+             Large Language Models in Urosepsis Management},
+  journal = {[Dergi — yayınlandığında]},
+  year    = {2026},
+  doi     = {[Manuscript DOI — yayınlandığında]},
+  note    = {Zenodo: 10.5281/zenodo.20133737; OSF: [OSF DOI]}
+}
+```
+
+## Yazarlar ve Kontakt
+
+| Sıra | Ad Soyad | Kurum | ORCID | Email |
+|---|---|---|---|---|
+| 1 (PI / Corresponding) | Yeşim Bayraktar | Selçuk University Faculty of Medicine, Department of Intensive Care | [0000-0001-5156-7064](https://orcid.org/0000-0001-5156-7064) | bayraktaryesim83@gmail.com |
+| 2 | Bilgi İşler | Konya City Hospital, University of Health Sciences | [0000-0003-1243-9072](https://orcid.org/0000-0003-1243-9072) | bilgi.isler249@gmail.com |
+| 3 | Ahmet Murat Bayraktar | Konya City Hospital, University of Health Sciences | [0000-0002-4913-8698](https://orcid.org/0000-0002-4913-8698) | drahmetbayraktar@gmail.com |
+
+- **Corresponding Author:** Yeşim Bayraktar — bayraktaryesim83@gmail.com
 - **Issues:** [GitHub Issues](https://github.com/bilgisler/urosepsis-llm-benchmark/issues)
