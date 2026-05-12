@@ -203,8 +203,8 @@ Hiçbir LLM provider çalışmanın tasarımına, veri toplama veya analizine ka
 | Sıra | Ad Soyad | Kurum | ORCID | Email |
 |---|---|---|---|---|
 | 1 (PI / Corresponding) | Yeşim Bayraktar | Selçuk University Faculty of Medicine, Department of Intensive Care | [0000-0001-5156-7064](https://orcid.org/0000-0001-5156-7064) | bayraktaryesim83@gmail.com |
-| 2 | Bilgi İşler | Konya City Hospital, University of Health Sciences | [0000-0003-1243-9072](https://orcid.org/0000-0003-1243-9072) | bilgi.isler249@gmail.com |
-| 3 | Ahmet Murat Bayraktar | Konya City Hospital, University of Health Sciences | [0000-0002-4913-8698](https://orcid.org/0000-0002-4913-8698) | drahmetbayraktar@gmail.com |
+| 2 | Bilgi İşler | Department of Urology, Konya City Hospital, University of Health Sciences | [0000-0003-1243-9072](https://orcid.org/0000-0003-1243-9072) | bilgi.isler249@gmail.com |
+| 3 | Ahmet Murat Bayraktar | Department of Urology, Konya City Hospital, University of Health Sciences | [0000-0002-4913-8698](https://orcid.org/0000-0002-4913-8698) | drahmetbayraktar@gmail.com |
 
 - **Corresponding Author:** Yeşim Bayraktar — bayraktaryesim83@gmail.com
 - **Issues:** [GitHub Issues](https://github.com/bilgisler/urosepsis-llm-benchmark/issues)
