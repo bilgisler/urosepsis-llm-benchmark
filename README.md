@@ -178,4 +178,4 @@ Hiçbir LLM provider çalışmanın tasarımına, veri toplama veya analizine ka
 ## Kontakt
 
 - **PI:** [Ad Soyad], [Kurum], [email]
-- **Issues:** [GitHub Issues](https://github.com/[USER]/urosepsis-llm-benchmark/issues)
+- **Issues:** [GitHub Issues](https://github.com/[bilgisler]/urosepsis-llm-benchmark/issues)
